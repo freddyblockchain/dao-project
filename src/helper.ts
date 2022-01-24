@@ -6,24 +6,29 @@ import { AssetHolding } from 'algosdk/dist/types/src/client/v2/algod/models/type
 const CHOICE_ASSET_ID = 21364625
 
 
-const validate_escrow_wallet = async (address: string, _mnemonic:string, client: AlgodClient):Promise<Boolean> => {
+export const validate_escrow_wallet = async (address: string, _mnemonic:string, client: AlgodClient):Promise<Boolean> => {
+
+    try{
     if (isValidAddress(address)){
         return false;
     }
 
-    if (mnemonicToSecretKey(_mnemonic).addr != address){
+    /*if (mnemonicToSecretKey(_mnemonic).addr != address){
+        return false
+    }*/
+
+    if  (!contains_choice_coin(address, client)){
         return false
     }
 
-    if  (!contains_choice_coin(address, client)){
+    /*if (await get_balance(address, client) < 1000){
         return false;
-    }
-
-    if (await get_balance(address, client) < 1000){
-        return false;
-    }
+    }*/
 
     return true;
+}catch(e){
+    console.log(e)
+}
 
 }
 
@@ -35,8 +40,12 @@ const get_balance = async (address: string, client: AlgodClient): Promise<number
 
 
 const contains_choice_coin = async (address: string, client: AlgodClient):Promise<Boolean> => {
+    try{
     const account = await client.accountInformation(address).do();
 
     const assets:AssetHolding[] = account.assets;
     return assets.some(asset => asset.assetId === CHOICE_ASSET_ID);
+    }catch(e){
+        console.log(e)
+    }
 }
