@@ -11,21 +11,24 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.validate_escrow_wallet = void 0;
 const algosdk_1 = require("algosdk");
-const CHOICE_ASSET_ID = 21364625;
+const CHOICE_ASSET_ID = 66923550;
 const validate_escrow_wallet = (address, _mnemonic, client) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        if ((0, algosdk_1.isValidAddress)(address)) {
+        if (!(0, algosdk_1.isValidAddress)(address)) {
             return false;
         }
-        /*if (mnemonicToSecretKey(_mnemonic).addr != address){
-            return false
-        }*/
+        if ((0, algosdk_1.mnemonicToSecretKey)(_mnemonic).addr != address) {
+            console.log("wrong address!");
+            return false;
+        }
         if (!contains_choice_coin(address, client)) {
+            console.log("no choice coin ");
             return false;
         }
-        /*if (await get_balance(address, client) < 1000){
+        if ((yield get_balance(address, client)) < 1000) {
+            console.log(yield get_balance(address, client));
             return false;
-        }*/
+        }
         return true;
     }
     catch (e) {

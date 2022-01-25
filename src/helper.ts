@@ -1,34 +1,37 @@
 
 import JSONRequest from 'algosdk/dist/types/src/client/v2/jsonrequest';
-import {isValidAddress,mnemonicToSecretKey,Account, Algodv2} from 'algosdk';
+import {isValidAddress,mnemonicToSecretKey} from 'algosdk';
 import AlgodClient from 'algosdk/dist/types/src/client/v2/algod/algod';
 import { AssetHolding } from 'algosdk/dist/types/src/client/v2/algod/models/types';
-const CHOICE_ASSET_ID = 21364625
+const CHOICE_ASSET_ID = 66923550
 
 
 export const validate_escrow_wallet = async (address: string, _mnemonic:string, client: AlgodClient):Promise<Boolean> => {
 
     try{
-    if (isValidAddress(address)){
+    if (!isValidAddress(address)){
         return false;
     }
 
-    /*if (mnemonicToSecretKey(_mnemonic).addr != address){
+    if (mnemonicToSecretKey(_mnemonic).addr != address){
+        console.log("wrong address!")
         return false
-    }*/
+    }
 
     if  (!contains_choice_coin(address, client)){
+        console.log("no choice coin ");
         return false
     }
 
-    /*if (await get_balance(address, client) < 1000){
+    if (await get_balance(address, client) < 1000){
+        console.log(await get_balance(address, client))
         return false;
-    }*/
-
+    }
     return true;
-}catch(e){
-    console.log(e)
-}
+
+    }catch(e){
+      console.log(e)
+    }
 
 }
 
