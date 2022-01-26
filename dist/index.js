@@ -89,7 +89,8 @@ const printAssetHolding = function (algodclient, account, assetid) {
 };
 // define a route handler for the default home page
 app.get("/", (req, res) => {
-    res.send("Hello world!");
+    const filePath = process.cwd() + '/src/public/index.html';
+    res.sendFile(filePath);
 });
 app.post("/validateWallet", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {

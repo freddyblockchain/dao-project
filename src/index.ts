@@ -6,6 +6,7 @@ import { validate_escrow_wallet } from "./helper";
 import { createAccount } from "./algofile";
 import AccountInformation from "algosdk/dist/types/src/client/v2/algod/accountInformation";
 import { mnemonicToSecretKey } from "algosdk";
+import path, { parse } from "path";
 
 const app = express();
 const port = 8080; // default port to listen
@@ -79,7 +80,8 @@ const printAssetHolding = async function (algodclient: AlgodClient, account: str
 
 // define a route handler for the default home page
 app.get( "/", ( req, res ) => {
-    res.send( "Hello world!" );
+    const filePath = process.cwd() + '/src/public/index.html';
+    res.sendFile(filePath);
 } );
 
 app.post( "/validateWallet", async ( req, res ) => {
