@@ -2,13 +2,25 @@ import express from "express";
 import algosdk, { makeAssetCreateTxn } from "algosdk";
 import { INVALID_MSIG_VERSION_ERROR_MSG } from "algosdk/dist/types/src/encoding/address";
 import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
-import { validate_escrow_wallet } from "./helper";
-import { createAccount } from "./algofile";
+import { sendChoiceCoin, validate_escrow_wallet } from "./helper";
+import { createAccount, OptIn } from "./algofile";
 import AccountInformation from "algosdk/dist/types/src/client/v2/algod/accountInformation";
 import { mnemonicToSecretKey } from "algosdk";
 import path, { parse } from "path";
+import { Worker, MessageChannel } from 'worker_threads';
 
-const app = express();
+
+export const app = express();
+app.use("/static", express.static('./src/static/'));
+app.use("/dist", express.static('./dist/'));
+
+const worker = new Worker('./dist/resultWorker.js');
+const { port1, port2 } = new MessageChannel();
+port1.on('message', (message) => {
+    console.log('message from worker:' + message);
+   });
+
+worker.postMessage({ port: port2 }, [port2]);
 const port = 8080; // default port to listen
 const mmenonic = "glance fame avocado team tobacco spoon actress author situate swarm embark check design reform radio alien bachelor matter best diesel whip select idle absorb film";
 
@@ -80,8 +92,25 @@ const printAssetHolding = async function (algodclient: AlgodClient, account: str
 
 // define a route handler for the default home page
 app.get( "/", ( req, res ) => {
-    const filePath = process.cwd() + '/src/public/index.html';
-    res.sendFile(filePath);
+    console.log("hello");
+} );
+
+app.post( "/createAccount", ( req, res ) => {
+    const account = createAccount(client);
+
+    res.send(account);
+} );
+
+app.post( "/optIn", ( req, res ) => {
+    try{
+        const body = req.body
+        // console.log(req.body)
+        const account = mnemonicToSecretKey(body.mmenonic);
+        OptIn(account,client);
+        res.send( "ok");
+        }catch(e){
+
+        }
 } );
 
 app.post( "/validateWallet", async ( req, res ) => {
@@ -103,9 +132,9 @@ app.post("/createAsset", async (req , res) => {
     const note = new Uint8Array(0);
     const defaultFrozen = false;
     const decimals = 0;
-    const totalIssuance = 10000;
-    const unitName = "TCC";
-    const assetName = "TestChoiceCoin";
+    const totalIssuance = 10000000;
+    const unitName = "TCC1";
+    const assetName = "TestChoiceCoin1";
     const assetURL = "http://someurl";
     const assetMetadataHash = "16efaa3924a6fd9d3a4824799a4ac65d";
     const manager = address
@@ -151,11 +180,18 @@ app.post("/createAsset", async (req , res) => {
     }
 });
 
+app.post("/sendChoiceCoin", async (req , res) => {
+    const body = req.body
+        // console.log(req.body)
+    const account = mnemonicToSecretKey(body.mmenonic);
+    const receivingAddress = '76YMRPUDAXVBVTIXWZUSBXN5QZ4AGM5ETMQZ3U2GWIBSNFVM76RO6CJ56E';
+
+    sendChoiceCoin(account,receivingAddress,client);
+
+    return res.send("ok");
+});
+
 // start the Express server
 app.listen( port, () => {
     console.log( `server started at http://localhost:${ port }` );
 } );
-
-app.post("/createAccount", async(req,res) => {
-    createAccount()
-});
