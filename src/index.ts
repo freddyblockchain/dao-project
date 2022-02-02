@@ -1,13 +1,19 @@
 import express from "express";
-import algosdk, { makeAssetCreateTxn } from "algosdk";
+import algosdk from "algosdk";
 import { INVALID_MSIG_VERSION_ERROR_MSG } from "algosdk/dist/types/src/encoding/address";
 import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
-import { sendChoiceCoin, validate_escrow_wallet } from "./helper";
+import { getReceivingChoiceCoinAddress, sendChoiceCoin, validate_escrow_wallet } from "./helper";
 import { createAccount, OptIn } from "./algofile";
-import AccountInformation from "algosdk/dist/types/src/client/v2/algod/accountInformation";
 import { mnemonicToSecretKey } from "algosdk";
-import path, { parse } from "path";
 import { Worker, MessageChannel } from 'worker_threads';
+import { GameState } from "./resultWorker";
+import { Direction } from "./gameMethods";
+import { client } from "./algoClient";
+
+process.on('uncaughtException', function (err) {
+    console.error(err);
+    console.log("Node NOT Exiting...");
+  });
 
 
 export const app = express();
@@ -16,12 +22,15 @@ app.use("/dist", express.static('./dist/'));
 
 const worker = new Worker('./dist/resultWorker.js');
 const { port1, port2 } = new MessageChannel();
-port1.on('message', (message) => {
-    console.log('message from worker:' + message);
+let state:GameState;
+port1.on('message', (message: GameState) => {
+    state = message;
+    console.log('message from worker:' + message.position.y);
    });
-
 worker.postMessage({ port: port2 }, [port2]);
+
 const port = 8080; // default port to listen
+
 const mmenonic = "glance fame avocado team tobacco spoon actress author situate swarm embark check design reform radio alien bachelor matter best diesel whip select idle absorb film";
 
 const bodyParser = require('body-parser')
@@ -29,14 +38,6 @@ app.use( bodyParser.json() );       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
 }));
-
-const getClient = () : AlgodClient => {
-    const algodToken = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
-    const algodServer = 'http://localhost';
-    const algodPort = 4001;
-    return new algosdk.Algodv2(algodToken, algodServer, algodPort);
-}
-const client = getClient();
 
 const waitForConfirmation = async function (algodclient: AlgodClient, txId: string) {
     const response = await algodclient.status().do();
@@ -93,6 +94,9 @@ const printAssetHolding = async function (algodclient: AlgodClient, account: str
 // define a route handler for the default home page
 app.get( "/", ( req, res ) => {
     console.log("hello");
+} );
+app.get( "/state", ( req, res ) => {
+    res.send(state);
 } );
 
 app.post( "/createAccount", ( req, res ) => {
@@ -180,15 +184,24 @@ app.post("/createAsset", async (req , res) => {
     }
 });
 
-app.post("/sendChoiceCoin", async (req , res) => {
-    const body = req.body
-        // console.log(req.body)
-    const account = mnemonicToSecretKey(body.mmenonic);
-    const receivingAddress = '76YMRPUDAXVBVTIXWZUSBXN5QZ4AGM5ETMQZ3U2GWIBSNFVM76RO6CJ56E';
+app.post("/sendChoiceCoin/:direction", async (req , res) => {
+    try{
+    const direction: number = parseInt(req.params.direction);
+    const directionEnum:Direction = direction;
 
-    sendChoiceCoin(account,receivingAddress,client);
+    const receivingAddress = getReceivingChoiceCoinAddress(direction);
+
+    const sendingAccount = mnemonicToSecretKey(mmenonic);
+
+    await sendChoiceCoin(sendingAccount, client, receivingAddress);
+    // console.log(direction.toString);
 
     return res.send("ok");
+
+    } catch(e){
+        console.log(e);
+        return res.send("error");
+    }
 });
 
 // start the Express server
