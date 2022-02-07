@@ -4,7 +4,7 @@
   "description": "an algo project",
   "main": "dist/index.js",
   "dependencies": {
-    "algosdk": "^1.13.0-beta.2",
+    "algosdk": "^1.13.1",
     "body-parser": "^1.19.1",
     "child-process": "^1.0.2",
     "cors": "^2.8.5",
