@@ -19,7 +19,7 @@
     "prestart": "npm run build",
     "start": "node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "tsc && mv -i -v public dist/ && rm -v -rf src"
+    "postinstall": "tsc"
   },
   "author": "frederik",
   "license": "ISC",
