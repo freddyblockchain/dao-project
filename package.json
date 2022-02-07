@@ -28,5 +28,6 @@
     "@types/express": "^4.17.13",
     "@types/node": "^17.0.16",
     "@types/sleep": "^0.0.8"
-  }
+  },
+  "engines": { "node": "16.13.0" }
 }
