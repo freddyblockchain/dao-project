@@ -6,19 +6,19 @@ import { AssetHolding } from 'algosdk/dist/types/src/client/v2/algod/models/type
 import { Direction } from './gameMethods';
 const CHOICE_ASSET_ID = 67736927;
 
-const upAddress = '76YMRPUDAXVBVTIXWZUSBXN5QZ4AGM5ETMQZ3U2GWIBSNFVM76RO6CJ56E';
-const rightAddress = 'FSYAIAXBFBMPWSYRUHYIIPLT62T3EEZSBTSNI7YTOPZRRBHIIIDSBOAUAU';
-const downAddress = 'EWRD4DEN63AXZE4ATFUULAJVRCVPVCIGXARI2O2NMU7FMJ7ABPAFTF22MI';
-const leftAddress = 'GK2P7BCBCZ4L4P7GGPKL6VE3JHGAV473FP2R2MQKS6GUZ2SODC3TIGL4NA';
+export const upAddress = '76YMRPUDAXVBVTIXWZUSBXN5QZ4AGM5ETMQZ3U2GWIBSNFVM76RO6CJ56E';
+export const rightAddress = 'FSYAIAXBFBMPWSYRUHYIIPLT62T3EEZSBTSNI7YTOPZRRBHIIIDSBOAUAU';
+export const downAddress = 'EWRD4DEN63AXZE4ATFUULAJVRCVPVCIGXARI2O2NMU7FMJ7ABPAFTF22MI';
+export const leftAddress = 'GK2P7BCBCZ4L4P7GGPKL6VE3JHGAV473FP2R2MQKS6GUZ2SODC3TIGL4NA';
 
 const upMnemonic = "trophy absorb slender alien rib stairs need welcome symbol text wait cluster water finger moral decide nephew party toddler fee square motor empower abstract trophy";
 const rightMnemonic = "drill mask govern private company pupil rigid bus casual garden enemy awful family horn unfair injury outdoor point apology robust access solid tumble ability fever";
 const downMnemonic = "hunt little small electric sugar item divide frost labor define ice fit speak spider fluid cancel industry catalog series mesh arena royal can able water";
 const leftMnemonic = "kitchen loan flame firm what inhale property afraid stumble spend dance echo slim setup core impose typical try hope country enough stand recycle above explain";
 
-let counter = 0;
-
 const mainAddress = "OI6YO7U7JRE2CWEOALW3HRHAT7S364ZCFW2E2SS4I3B3BIUSUVPRJI7VRY";
+
+let uniqueCounter = 0;
 
 export const validate_escrow_wallet = async (address: string, _mnemonic:string, client: AlgodClient):Promise<Boolean> => {
 
@@ -54,32 +54,30 @@ export const validate_escrow_wallet = async (address: string, _mnemonic:string, 
 
 const get_balance = async (address: string, client: AlgodClient): Promise<number> => {
     const account = await client.accountInformation(address).do();
-   // console.log(account);
     return account.amount;
 }
 
-const choiceCoinBalance = async (address: string, client: AlgodClient): Promise<number | bigint> => {
-    console.log("in here three ?")
+export const choiceCoinBalance = async (address: string, client: AlgodClient): Promise<number> => {
     const account = await client.accountInformation(address).do();
-    console.log(account);
+    // console.log(account);
     const assets = account.assets;
 
     const asset: { 'asset-id': number, amount: number;} =
     assets.find(((asset: { 'asset-id': number, amount: number; }) => asset['asset-id'] === CHOICE_ASSET_ID));
-
-    console.log("asset has amount: " + asset.amount);
 
     return asset ? asset.amount : 0;
 }
 
 
 const sendBackChoiceCoinForWallet = async (address: string, client: AlgodClient, mmemonic: string) => {
-    const status = (await client.status().do());
     const balance = await choiceCoinBalance(address,client);
     if(balance > 0){
-        console.log("trying to send " + await choiceCoinBalance('EWRD4DEN63AXZE4ATFUULAJVRCVPVCIGXARI2O2NMU7FMJ7ABPAFTF22MI',client) + "back to main wallet")
+        console.log(" sending back " + balance + "choice coins " )
         const account = mnemonicToSecretKey(mmemonic);
-        sendChoiceCoin(account, client, mainAddress, balance as number);
+        await sendChoiceCoin(account, client, mainAddress, balance as number);
+        const afterSending = await choiceCoinBalance(address,client);
+        console.log(" balance after sending choice coin: " + afterSending);
+
     }
 }
 
@@ -122,17 +120,19 @@ export const sendChoiceCoin = async (sendingAccount: Account,client: AlgodClient
 // to account3
 const revocationTarget:any = undefined;
 const closeRemainderTo:any = undefined;
-counter++;
-const note:Uint8Array = new TextEncoder().encode(counter.toString());
+
+const note:Uint8Array = new TextEncoder().encode(new Date().toString() + uniqueCounter);
 const params = await client.getTransactionParams().do();
 // Amount of the asset to transfer
+uniqueCounter++;
 
 // signing and sending "txn" will send "amount" assets from "sender" to "recipient"
 const xtxn = makeAssetTransferTxnWithSuggestedParams(sendingAccount.addr, receivingAddress, closeRemainderTo, revocationTarget,
         amount,  note, CHOICE_ASSET_ID, params);
 // Must be signed by the account sending the asset
 const rawSignedTxn = xtxn.signTxn(sendingAccount.sk);
-const xtx = (await client.sendRawTransaction(rawSignedTxn).do());
+const xtx = await client.sendRawTransaction(rawSignedTxn).do();
+console.log("dosn't go here");
 console.log("Transaction : " + xtx.txId);
 // wait for transaction to be confirmed
 }

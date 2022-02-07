@@ -1,3 +1,5 @@
+import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
+import { choiceCoinBalance, downAddress, leftAddress, rightAddress, upAddress } from "./helper";
 import {GameState } from "./resultWorker";
 
 const map: string[] = 'Bxxxxxxx,xbxbxxxx,xbxxxxxx,xxxxxxbx,xxxxxbxx,bxxxxxxx,xxxxbxxb,xxxxxxxA,'.split(',');
@@ -28,8 +30,8 @@ export const move = (direction: Direction, pos:{x: number, y:number}): {x: numbe
     return {x:pos.x,y:pos.y}
 }
 
-export const calculateState = (prevState: GameState):GameState => {
-    const direction = calculateDirection();
+export const calculateState = async (prevState: GameState, client: AlgodClient):Promise<GameState> => {
+    const direction = await calculateDirection(client);
     const pos = move(direction, prevState.position);
     const posAfterField = getFieldResult(pos);
 
@@ -53,8 +55,27 @@ const getFieldResult = (pos: {x: number,y:number}): {field: Field, pos: {x:numbe
 }
 
 
-const calculateDirection = () => {
-    return Direction.LEFT;
+const calculateDirection = async (client: AlgodClient) => {
+    const upBalance = await choiceCoinBalance(upAddress,client);
+    const rightBalance = await choiceCoinBalance(rightAddress,client);
+    const downBalance = await choiceCoinBalance(downAddress,client);
+    const leftBalance = await choiceCoinBalance(leftAddress,client);
+
+    const max = Math.max(upBalance,rightBalance,downBalance,leftBalance);
+
+    if(max == upBalance && rightBalance != max && downBalance != max && leftBalance!= max){
+        return Direction.UP;
+    }
+    if(rightBalance == max && upBalance!= max && downBalance!= max && leftBalance!= max){
+        return Direction.RIGHT;
+    }
+    if(downBalance == max && upBalance!= max && rightBalance!= max && leftBalance!= max){
+        return Direction.DOWN;
+    }
+    if(leftBalance == max && upBalance!= max && rightBalance!= max && downBalance!= max){
+        return Direction.LEFT;
+    }
+    return Direction.STAY;
 }
 
 export enum Direction {

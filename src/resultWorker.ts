@@ -12,7 +12,7 @@ const getClient = () : AlgodClient => {
     const algodPort = 4001;
     return new algosdk.Algodv2(algodToken, algodServer, algodPort);
 }
-const client = getClient();
+const client = getClient()
 
 export type GameState = {
     counter: number,
@@ -35,7 +35,7 @@ parentPort.on('message', async (data) => {
         const { port }: { port: MessagePort} = data;
         while(1){
         sleep(10);
-        state = calculateState(state);
+        state = await calculateState(state, client);
         await sendBackChoiceCoin(client);
         port.postMessage(state);
        }

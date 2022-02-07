@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import algosdk from "algosdk";
 import { INVALID_MSIG_VERSION_ERROR_MSG } from "algosdk/dist/types/src/encoding/address";
 import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
@@ -19,13 +20,14 @@ process.on('uncaughtException', function (err) {
 export const app = express();
 app.use("/static", express.static('./src/static/'));
 app.use("/dist", express.static('./dist/'));
+app.use(cors());
 
 const worker = new Worker('./dist/resultWorker.js');
 const { port1, port2 } = new MessageChannel();
 let state:GameState;
 port1.on('message', (message: GameState) => {
     state = message;
-    console.log('message from worker:' + message.position.y);
+    console.log(state);
    });
 worker.postMessage({ port: port2 }, [port2]);
 
@@ -46,7 +48,6 @@ const waitForConfirmation = async function (algodclient: AlgodClient, txId: stri
         const pendingInfo = await algodclient.pendingTransactionInformation(txId).do();
         if (pendingInfo["confirmed-round"] !== null && pendingInfo["confirmed-round"] > 0) {
             // Got the completed Transaction
-            console.log("Transaction " + txId + " confirmed in round " + pendingInfo["confirmed-round"]);
             break;
         }
         lastround++;
@@ -66,9 +67,7 @@ const printCreatedAsset = async function (algodclient: AlgodClient, account: str
     for (let idx = 0; idx < accountInfo['created-assets'].length; idx++) {
         const scrutinizedAsset = accountInfo['created-assets'][idx];
         if (scrutinizedAsset.index == assetid) {
-            console.log("AssetID = " + scrutinizedAsset.index);
             const myparms = JSON.stringify(scrutinizedAsset.params, undefined, 2);
-            console.log("parms = " + myparms);
             break;
         }
     }
