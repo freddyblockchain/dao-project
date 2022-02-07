@@ -15,7 +15,6 @@
     "worker-threads": "^1.0.0"
   },
   "scripts": {
-    "prebuild": "tslint -c tslint.json -p tsconfig.json --fix",
     "build": "tsc",
     "prestart": "npm run build",
     "start": "node dist/index.js",
