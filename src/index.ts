@@ -31,7 +31,7 @@ port1.on('message', (message: GameState) => {
    });
 worker.postMessage({ port: port2 }, [port2]);
 
-const port = 8080; // default port to listen
+const port = process.env.PORT || 8080
 
 const mmenonic = "glance fame avocado team tobacco spoon actress author situate swarm embark check design reform radio alien bachelor matter best diesel whip select idle absorb film";
 
@@ -205,6 +205,6 @@ app.post("/sendChoiceCoin/:direction", async (req , res) => {
 });
 
 // start the Express server
-app.listen( port, () => {
+app.listen(port, () => {
     console.log( `server started at http://localhost:${ port }` );
 } );
