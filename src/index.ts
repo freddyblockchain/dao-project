@@ -93,6 +93,7 @@ const printAssetHolding = async function (algodclient: AlgodClient, account: str
 // define a route handler for the default home page
 app.get( "/", ( req, res ) => {
     console.log("hello");
+    res.send("test");
 } );
 app.get( "/state", ( req, res ) => {
     res.send(state);
