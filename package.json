@@ -11,6 +11,7 @@
     "express": "^4.17.2",
     "phaser": "^3.55.2",
     "sleep": "^6.3.0",
+    "typescript": "^4.5.5",
     "worker-threads": "^1.0.0"
   },
   "scripts": {
