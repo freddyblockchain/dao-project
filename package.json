@@ -18,7 +18,8 @@
     "build": "tsc",
     "prestart": "npm run build",
     "start": "node dist/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "npm run build"
   },
   "author": "frederik",
   "license": "ISC",
