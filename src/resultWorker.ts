@@ -34,7 +34,7 @@ parentPort.on('message', async (data) => {
     try{
         const { port }: { port: MessagePort} = data;
         while(1){
-        sleep(10);
+        sleep(12);
         state = await calculateState(state, client);
         await sendBackChoiceCoin(client);
         port.postMessage(state);

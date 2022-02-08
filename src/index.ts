@@ -3,7 +3,7 @@ import cors from "cors";
 import algosdk from "algosdk";
 import { INVALID_MSIG_VERSION_ERROR_MSG } from "algosdk/dist/types/src/encoding/address";
 import AlgodClient from "algosdk/dist/types/src/client/v2/algod/algod";
-import { getReceivingChoiceCoinAddress, sendChoiceCoin, validate_escrow_wallet } from "./helper";
+import { choiceCoinBalance, getReceivingChoiceCoinAddress, sendChoiceCoin, validate_escrow_wallet } from "./helper";
 import { createAccount, OptIn } from "./algofile";
 import { mnemonicToSecretKey } from "algosdk";
 import { Worker, MessageChannel } from 'worker_threads';
@@ -96,7 +96,7 @@ app.get( "/", ( req, res ) => {
     res.send("test");
 } );
 app.get( "/state", ( req, res ) => {
-    res.send(state);
+    res.send({statusCode: "ok", result: state});
 } );
 
 app.post( "/createAccount", ( req, res ) => {
@@ -197,6 +197,21 @@ app.post("/sendChoiceCoin/:direction", async (req , res) => {
     // console.log(direction.toString);
 
     return res.send("ok");
+
+    } catch(e){
+        console.log(e);
+        return res.send("error");
+    }
+});
+
+
+app.get("/getChoiceCoin/:direction", async (req , res) => {
+    try{
+    const direction: number = parseInt(req.params.direction);
+    const address = getReceivingChoiceCoinAddress(direction);
+    const amount = await choiceCoinBalance(address,client);    
+
+    return res.send({statusCode: 'ok', result: amount});
 
     } catch(e){
         console.log(e);
