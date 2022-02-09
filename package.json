@@ -24,7 +24,7 @@
     "prestart": "npm run build",
     "start": "node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "tsc && apt install docker-compose"
+    "postinstall": "tsc"
   },
   "author": "frederik",
   "license": "ISC",
