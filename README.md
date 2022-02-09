@@ -10,9 +10,9 @@ but i was unable to get the sandbox up and running on heroku.
 
 git clone https://github.com/freddyblockchain/dao-project.git --recursive
 
-start the algorand sandbox with : sudo sandbox/./sandbox up testnet
-
 cd dao-project
+
+start the algorand sandbox with : sudo sandbox/./sandbox up testnet
 
 npm install
 
