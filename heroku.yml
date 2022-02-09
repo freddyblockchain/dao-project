@@ -1,3 +1,3 @@
 build:
   docker:
-    web: sandbox/images/Dockerfile
+    web: sandbox/images/algod/Dockerfile
