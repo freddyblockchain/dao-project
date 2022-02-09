@@ -24,7 +24,7 @@
     "prestart": "npm run build",
     "start": "node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "tsc && curl -L https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose"
+    "postinstall": "tsc && curl -L https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m) -o /docker-compose && chmod +x /docker-compose"
   },
   "author": "frederik",
   "license": "ISC",
